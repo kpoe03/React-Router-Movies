@@ -4,26 +4,24 @@ import axios from 'axios';
 
 const Movie = (props) => {
   const [movie, setMovie] = useState();
-
-  console.log(props);
- 
+  const [movieError, setMovieError] = useState([]);
+  const {id} = props.match.params; 
   useEffect(() => {
-    const id = props.match.params.id;
-    
-
-       axios
-        .get(`http://localhost:5000/api/movies/${id}`)
-        .then(response => {
+    const getMovies = async () => {
+        try {
+          const response = await axios.get(`http://localhost:5000/api/movies/${id}`)
           setMovie(response.data);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-
-  },[props.match.params.id]);
+        } catch(error) {
+           console.log(error);
+           setMovieError(error);
+        }
+    }
+    getMovies();      
+  },[id]);
   
   const saveMovie = () => {
-  
+    const addToSavedList = props.addToSavedList;
+    addToSavedList(movie)
   }
 
   if (!movie) {
@@ -31,7 +29,6 @@ const Movie = (props) => {
   }
 
   const { title, director, metascore, stars } = movie;
-  console.log(movie);
   return (
     <div className="save-wrapper">
       <div className="movie-card">
@@ -42,14 +39,16 @@ const Movie = (props) => {
         <div className="movie-metascore">
           Metascore: <strong>{metascore}</strong>
         </div>
-        <h3>Actors: </h3>
+        <h3>Actors</h3>
+
         {stars.map(star => (
           <div key={star} className="movie-star">
             {star}
           </div>
         ))}
       </div>
-      <button className="save-button" onClick={saveMovie}>Save</button> 
+      <div className="save-button"
+          onClick={saveMovie}>Save</div>
     </div>
   );
 }
